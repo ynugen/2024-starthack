@@ -48,21 +48,21 @@ typedef struct nnetwork {
     /* Total number of neurons */
     int total_neurons;
 
-    /* 2D array of weights for each layer */
-    double **weights;
+    /* Flattened array of weights for each layer */
+    double *weights;
 
-    /* 2D array of biases for each layer */
-    double **biases;
+    /* Flattened array of biases for each layer */
+    double *biases;
 
     /* Output array for each neuron */
     double *outputs;
 } nnetwork_t;
 
 /* ReLU function */
-double relu(nnetwork_t *nn, double a);
+double relu(const nnetwork_t *nn, double a);
 
 /* Softmax function */
-double softmax(nnetwork_t *nn, double *a);
+int softmax(const nnetwork_t *nn, double *a);
 
 /* Initialise memory for new neural network */
 nnetwork_t *nnetwork_init();

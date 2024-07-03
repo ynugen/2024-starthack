@@ -5,6 +5,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <math.h>
+#include <assert.h>
 
 /* ReLU function 
  *
@@ -12,7 +13,7 @@
  *     * nn : pointer to neural network struct
  *        a : input value
  */
-double relu(nnetwork_t *nn, double a) {
+double relu(const nnetwork_t *nn, double a) {
     assert(!isnan(a));
 
     if(a > 0) {
@@ -25,7 +26,7 @@ double relu(nnetwork_t *nn, double a) {
  *
  * Adapted from: https://en.wikipedia.org/wiki/Softmax_function
  */
-int softmax(nnetwork_t *nn, double *a) {
+int softmax(const nnetwork_t *nn, double *a) {
     int argmax = 0;
     double max = 0.0;
     double exp_sum = 0.0;
@@ -46,7 +47,7 @@ int softmax(nnetwork_t *nn, double *a) {
     }
 
     /* Normalise values */
-    for (int i = 0; i < OUTPUT_DIMENSION) {
+    for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
         nn->outputs[i] /= exp_sum;
     }
 
@@ -125,7 +126,7 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
             weight_read = 1;
             bias_read = 0;
             continue;
-        } else if(strstr(line, "bias:" != NULL)) {
+        } else if(strstr(line, "bias:") != NULL) {
             weight_read = 0;
             bias_read = 1;
             continue;
@@ -154,10 +155,12 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
             ptr = NULL;
             
             if (weight_read && curr_weight_ptr < nn->weights + nn->total_weights) {
-                *curr_weight_ptr++ = (double) value;
+                *curr_weight_ptr = (double) value;
+                curr_weight_ptr++;
                 weight_read = 0;
             } else if (bias_read && curr_bias_ptr < nn->biases + nn->total_biases) {
-                *curr_bias_ptr++ = (double) value;  
+                *curr_bias_ptr = (double) value;
+                curr_bias_ptr++;
             } else {
                 perror("nnetwork_read: Error in reading value");
                 exit(EXIT_FAILURE);

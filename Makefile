@@ -4,21 +4,23 @@ CFLAGS = -Wall -g
 LDLIBS = -lm
 
 # Source and object files
-SRCS = (*.c)
+SRCS = $(wildcard *.c)
+# SRCS = main.c neural.c
 OBJS = $(SRCS:.c=.o)
 
 # Executables
-EXECS = $(SRCS:%.c=%)
+# EXECS = $(SRCS:%.c=%)
+EXECS = speed_gpu
 
 # Targets
 default: all
 
-all: $(EXE)
+all: $(EXECS)
 
-$(EXES): $(OBJS)
-	$(CC) $(CFLAGS) -o $(EXES) $(OBS) $(LDLIBS)
+$(EXECS): $(OBJS)
+	$(CC) $(CFLAGS) -o $(EXECS) $(OBJS) $(LDLIBS)
 
 clean:
 	rm -f $(OBJS) $(EXECS)
 
-.PHONY: EXECS clean
+
