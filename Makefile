@@ -1,26 +1,35 @@
-# Compiler flags
+# Define the compiler
 CC = gcc
-CFLAGS = -Wall -g
-LDLIBS = -lm
 
-# Source and object files
-SRCS = $(wildcard *.c)
-# SRCS = main.c neural.c
+# Define compiler flags
+CFLAGS = -Wall -g
+
+# Define the target executable
+TARGET = main
+
+# Define the source files
+SRCS = main.c neural.c
+
+# Define the header files
+HEADERS = neural.h
+
+# Define the object files (replace .c with .o)
 OBJS = $(SRCS:.c=.o)
 
-# Executables
-# EXECS = $(SRCS:%.c=%)
-EXECS = speed_gpu
+# Default target to build the executable
+all: $(TARGET)
 
-# Targets
-default: all
+# Rule to build the target executable
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-all: $(EXECS)
+# Rule to compile source files into object files
+%.o: %.c $(HEADERS)
+	$(CC) $(CFLAGS) -c $< -o $@
 
-$(EXECS): $(OBJS)
-	$(CC) $(CFLAGS) -o $(EXECS) $(OBJS) $(LDLIBS)
-
+# Clean target to remove generated files
 clean:
-	rm -f $(OBJS) $(EXECS) test.txt
+	rm -f $(OBJS) $(TARGET)
 
-
+# Phony targets (not actual files)
+.PHONY: all clean

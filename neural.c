@@ -244,21 +244,21 @@ void nnetwork_print(nnetwork_t *nn) {
 /* Run the neural network with a given tensor */
 int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
     /* Allocate mem for input buffer */
-    double *inputs = (double *) malloc(sizeof(double) * INPUT_DIMENSION);
+    char *inputs = (char *) malloc(sizeof(char) * INPUT_DIMENSION);
     if (!inputs) {
         perror("nnetwork_run: MALLOC error");
         exit(EXIT_FAILURE);
     }
     size_t inputs_size = 0;
 
-    double *inputs_ptr = inputs;
+    char *inputs_ptr = inputs;
 
     /* Read in tensor to input buffer */
     while(getline(&inputs, &inputs_size, tensor) > 0) {
-        inputs[strcspn(inputs, "\n")] = '\0';
+        inputs[strcspn((char *)inputs, "\n")] = '\0';
         
         char *token;
-        char *ptr = inputs_ptr;
+        char *ptr = (char *)inputs_ptr;
         int i = 0;
         while((token = strtok(ptr, ",")) != NULL) {
             if (i >= INPUT_DIMENSION) {
@@ -290,16 +290,17 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
 
     /* Compute output layer with given equation from upstream github */
     
-    double *in = nn->output;
-    double *out = nn->output + nn->input;
+    double *in = nn->outputs;
+    double *out = nn->outputs + nn->input;
     double *w = nn->weights;
     double *b = nn->biases;
     
     int d = 0;
     for (int i = 0; i < nn->hidden_layers; ++i) {
         
-        while (i == 0 && d < INPUT_DIMENSION)
+        while (i == 0 && d < INPUT_DIMENSION) {
         double h = (*w++) * (*in) + (*b++);
+        }
 
     }
 
