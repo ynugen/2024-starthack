@@ -20,7 +20,7 @@
 #define HIDDEN_DIMENSION_6 40
 #define OUTPUT_DIMENSION 52
 
-#define MAX_LINE_ELEMENTS 225
+#define MAX_LINE_ELEMENTS 22050
 
 struct nnetwork;
 
@@ -72,5 +72,11 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases);
 
 /* Free memory used by a neural network */
 void nnetwork_free(nnetwork_t* nn);
+
+/* Print neural network. Used for error checking in storing values */
+void nnetwork_print(nnetwork_t *nn);
+
+/* Run the neural network with a given tensor */
+
 
 #endif

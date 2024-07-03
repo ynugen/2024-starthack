@@ -21,6 +21,6 @@ $(EXECS): $(OBJS)
 	$(CC) $(CFLAGS) -o $(EXECS) $(OBJS) $(LDLIBS)
 
 clean:
-	rm -f $(OBJS) $(EXECS)
+	rm -f $(OBJS) $(EXECS) test.txt
 
 

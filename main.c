@@ -9,6 +9,8 @@ int main(int argc, char** argv) {
     assert(f);
     
     nnetwork_t *nn = nnetwork_read(f);
-
+    fclose(f);
+    
+    nnetwork_print(nn);
     nnetwork_free(nn);
 }

@@ -138,6 +138,7 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
         int i = 0;
         while ((token = strtok(ptr, ",")) != NULL) {
             if (i >= MAX_LINE_ELEMENTS) {
+                printf("Elements: %d\n", i);
                 perror("nnetwork_read: Line too long");
                 exit(EXIT_FAILURE);
             }
@@ -154,15 +155,21 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
             }
             ptr = NULL;
             
-            if (weight_read && curr_weight_ptr < nn->weights + nn->total_weights) {
+            // if (weight_read && curr_weight_ptr < nn->weights + nn->total_weights) {
+            //     *curr_weight_ptr = (double) value;
+            //     curr_weight_ptr++;
+            // } else if (bias_read && curr_bias_ptr < nn->biases + nn->total_biases) {
+            //     *curr_bias_ptr = (double) value;
+            //     curr_bias_ptr++;
+            if(weight_read) {
                 *curr_weight_ptr = (double) value;
                 curr_weight_ptr++;
-                weight_read = 0;
-            } else if (bias_read && curr_bias_ptr < nn->biases + nn->total_biases) {
+            } else if (bias_read) {
                 *curr_bias_ptr = (double) value;
                 curr_bias_ptr++;
             } else {
-                perror("nnetwork_read: Error in reading value");
+                printf("ITEM: %d WEIGHT READ: %d BIAS READ: %d\nCURR_WEIGHT_PTR: %p\nWEIGHTS + TOTAL WEIGHTS: %p\n", i, weight_read, bias_read, curr_weight_ptr, nn->weights + nn->total_weights);
+                perror("nnetwork_read: Error in storing value");
                 exit(EXIT_FAILURE);
             }
             i++;
@@ -176,4 +183,60 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
 void nnetwork_free(nnetwork_t* nn) {
     /* Memory in nn allocated to single contiguous block */
     free(nn);
+}
+
+/* Print neural network to file */
+void nnetwork_print(nnetwork_t *nn) {
+    FILE *f;
+    f = fopen("test.txt", "w");
+    for (int i = 0; i <nn->total_weights; ++i) {
+        /* Print headers */
+        if (i == 0) {
+            fprintf(f,"LAYER 1 WEIGHTS:\n");
+        } else if (i == INPUT_DIMENSION *HIDDEN_DIMENSION_1) {
+            fprintf(f,"\n");
+            return;
+            fprintf(f,"LAYER 2 WEIGHTS:\n");
+        } else if (i == HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2) {
+            fprintf(f,"LAYER 3 WEIGHTS:\n");
+        } else if (i == HIDDEN_DIMENSION_2 * HIDDEN_DIMENSION_3) {
+            fprintf(f,"LAYER 4 WEIGHTS:\n");
+        } else if (i == HIDDEN_DIMENSION_3 * HIDDEN_DIMENSION_4) {
+            fprintf(f,"LAYER 5 WEIGHTS:\n");
+        } else if (i == HIDDEN_DIMENSION_4 * HIDDEN_DIMENSION_5) {
+            fprintf(f,"LAYER 6 WEIGHTS:\n");
+        } else if (i == HIDDEN_DIMENSION_5 * HIDDEN_DIMENSION_6) {
+            fprintf(f, "LAYER 7 WEIGHTS:\n");
+        } else {
+            fprintf(f, ",");
+        }
+        fprintf(f, "%1.19g", nn->weights[i]);
+    }
+    fprintf(f,"\n");
+
+    for (int i = 0; i <nn->total_biases; ++i) {
+        /* Print headers */
+        if (i == 0) {
+            fprintf(f,"LAYER 1 BIAS:\n");
+        } else if (i == HIDDEN_DIMENSION_1) {
+            fprintf(f,"\n");
+            break;
+            fprintf(f,"LAYER 2 BIAS:\n");
+        } else if (i == HIDDEN_DIMENSION_2) {
+            fprintf(f,"LAYER 3 BIAS:\n");
+        } else if (i == HIDDEN_DIMENSION_3) {
+            fprintf(f,"LAYER 4 BIAS:\n");
+        } else if (i == HIDDEN_DIMENSION_4) {
+            fprintf(f,"LAYER 5 BIAS:\n");
+        } else if (i == HIDDEN_DIMENSION_5) {
+            fprintf(f,"LAYER 6 BIAS:\n");
+        } else if (i == HIDDEN_DIMENSION_6) {
+            fprintf(f,"LAYER 7 BIAS:\n");
+        } else {
+            fprintf(f, ",");
+        }
+        fprintf(f,"%g", nn->biases[i]);
+    }
+    fprintf(f,"\n");
+    fclose(f);
 }
