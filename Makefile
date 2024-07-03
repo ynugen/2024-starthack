@@ -1,7 +1,7 @@
 # Compiler flags
 CC = gcc
 CFLAGS = -Wall -g
-LDLIBS =
+LDLIBS = -lm
 
 # Source and object files
 SRCS = (*.c)
@@ -21,4 +21,4 @@ $(EXES): $(OBJS)
 clean:
 	rm -f $(OBJS) $(EXECS)
 
-
+.PHONY: EXECS clean
