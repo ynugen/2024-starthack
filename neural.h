@@ -77,6 +77,6 @@ void nnetwork_free(nnetwork_t* nn);
 void nnetwork_print(nnetwork_t *nn);
 
 /* Run the neural network with a given tensor */
-
+int const *nnetwork_run(nnetwork_t *nn, FILE *tensor);
 
 #endif

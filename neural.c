@@ -117,7 +117,7 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
     int weight_read = 0;
     int bias_read = 0;
     
-    while (getline(&line, &line_size, weights_and_biases) >0) {
+    while (getline(&line, &line_size, weights_and_biases) > 0) {
         /* Calculate line size */
         line[strcspn(line, "\n")] = '\0';
 
@@ -150,7 +150,7 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
             /* Convert str to double */
             double value = strtod(token, &end_ptr);
             if (errno || *end_ptr != '\0' || end_ptr == token) {
-                fprintf(stderr, "nnetwork_read: Read error with value: %s\n", token);
+                fprintf(stderr, "nnetwork_read: Read error with weight or bias value: %s\n", token);
                 exit(EXIT_FAILURE);
             }
             ptr = NULL;
@@ -239,4 +239,69 @@ void nnetwork_print(nnetwork_t *nn) {
     }
     fprintf(f,"\n");
     fclose(f);
+}
+
+/* Run the neural network with a given tensor */
+int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
+    /* Allocate mem for input buffer */
+    double *inputs = (double *) malloc(sizeof(double) * INPUT_DIMENSION);
+    if (!inputs) {
+        perror("nnetwork_run: MALLOC error");
+        exit(EXIT_FAILURE);
+    }
+    size_t inputs_size = 0;
+
+    double *inputs_ptr = inputs;
+
+    /* Read in tensor to input buffer */
+    while(getline(&inputs, &inputs_size, tensor) > 0) {
+        inputs[strcspn(input, "\n")] = '\0';
+        
+        char *token;
+        char *ptr = inputs_ptr;
+        int i = 0;
+        while((token = strtok(ptr, ",")) != NULL) {
+            if (i >= INPUT_DIMENSION) {
+                perror("nnetwork_run: Too many elements");
+                exit(EXIT_FAILURE);
+            }
+
+            errno = 0;
+            char *end_ptr;
+
+            /* Read and convert value to double */
+            double value = strtod(token, &end_ptr);
+
+            if(errno || *end_ptr != '\0' || end_ptr == token) {
+                fprintf(stderr, "nnetwork_run: Read error with tensor value");
+                exit(EXIT_FAILURE);
+            }
+
+            ptr = NULL;
+            /* Store value in input buffer and increment */
+            *inputs_ptr = (double) value;
+            inputs_ptr++;
+            i++;
+        }
+    }
+
+    /* Store inputs in the respective neurons of output */
+    memcpy(nn->outputs, inputs, sizeof(double) * nn->input);
+
+    /* Compute output layer with given equation from upstream github */
+    
+    double *in = nn->output;
+    double *out = nn->output + nn->input;
+    double *w = nn->weights;
+    double *b = nn->biases;
+    
+    int d = 0;
+    for (int i = 0; i < nn->hidden_layers; ++i) {
+        
+        while (i == 0 && d < INPUT_DIMENSION)
+        double h = (*w++) * (*in) + (*b++);
+
+    }
+
+    free(inputs);
 }
