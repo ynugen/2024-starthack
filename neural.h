@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-#define MAX_LAYERS 7
+#define HIDDEN_LAYERS 6
 #define INPUT_DIMENSION 225
 #define HIDDEN_DIMENSION_1 98
 #define HIDDEN_DIMENSION_2 65
@@ -22,19 +22,20 @@
 
 struct nnetwork;
 
-/* Activation function */
-typedef double (*actfun)(const struct nnetwork* nn, double a);
+/* Activation functions */
+typedef double (*hidden_actfun)(const struct nnetwork* nn, double a);
+typedef int (*output_actfun)(const struct nnetwork* nn, double *a);
 
 /* Describes architecture of neural network*/
 typedef struct nnetwork {
     /* Number of input & output units, hidden layers, and hidden neurons */
-    int input, hidden_layers, hidden, output;
+    int input, hidden_layers, hidden_neurons, output;
 
     /* Activation function between input and hidden layers. Default: ReLU */
-    actfun activation_hidden;
+    hidden_actfun activation_hidden;
 
     /* Activation function used for output layer. Default: Sigmoid */
-    actfun activation_output;
+    output_actfun activation_output;
 
     /* Total number of weights */
     int total_weights;
@@ -46,16 +47,33 @@ typedef struct nnetwork {
     int total_neurons;
 
     /* 2D array of weights for each layer */
-    double **weight;
+    double **weights;
 
     /* 2D array of biases for each layer */
     double **biases;
 
-    /* Input and output array for each neuron*/
-    double *output;
+    /* Output array for each neuron */
+    double *outputs;
 } nnetwork_t;
 
-/* Initialise a neural network given file specifying weights and biases */
+/* ReLU function
+ *
+ * Parameters:
+ *     *nn : pointer to neural network struct
+ *     a   : input value
+ */
+double relu(nnetwork_t *nn, double a);
 
+/* Softmax function */
+double softmax(nnetwork_t *nn, double *a);
+
+/* Initialise memory for new neural network */
+nnetwork_t *nnetwork_init();
+
+/* Initialise a neural network given file specifying weights and biases */
+nnetwork_t *nnetwork_read(FILE *weights_and_biases);
+
+/* Free memory used by a neural network */
+void nnetwork_free(nnetwork_t* nn);
 
 #endif
