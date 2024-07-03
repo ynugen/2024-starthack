@@ -1,5 +1,4 @@
 #include "neural.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,7 +6,12 @@
 #include <limits.h>
 #include <math.h>
 
-/* ReLU function */
+/* ReLU function 
+ *
+ * Parameters:
+ *     * nn : pointer to neural network struct
+ *        a : input value
+ */
 double relu(nnetwork_t *nn, double a) {
     assert(!isnan(a));
 
@@ -17,7 +21,10 @@ double relu(nnetwork_t *nn, double a) {
     return 0;
 }
 
-/* Softmax function */
+/* Softmax function 
+ *
+ * Adapted from: https://en.wikipedia.org/wiki/Softmax_function
+ */
 int softmax(nnetwork_t *nn, double *a) {
     int argmax = 0;
     double max = 0.0;
@@ -86,11 +93,81 @@ nnetwork_t *nnetwork_init() {
     nn->biases = nn->weights + nn->total_weights;
     nn->outputs = nn->biases + nn->total_biases;
 
-    nn->activation_hidden;
+    nn->activation_hidden = relu;
+    nn->activation_output = softmax;
+
+    return nn;
 }
 
-/* Initialise a neural network given file specifying weights and biases */
-nnetwork_t *nnetwork_read(FILE *weights_and_biases);
+/* Build neural network given file specifying weights and biases 
+ *
+ * Adapted from: https://stackoverflow.com/questions/62409573/what-is-the-fastest-way-to-read-several-lines-of-data-from-a-large-file 
+ */
+nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
+    nnetwork_t *nn = nnetwork_init();
+    char *line = NULL;
+    size_t line_size = 0;
+
+    /* Set pointers */
+    double *curr_weight_ptr = nn->weights;
+    double *curr_bias_ptr = nn->biases;
+
+    /* Set read state flags */
+    int weight_read = 0;
+    int bias_read = 0;
+    
+    while (getline(&line, &line_size, weights_and_biases) >0) {
+        /* Calculate line size */
+        line[strcspn(line, "\n")] = '\0';
+
+        /* Skip if line is a header. */
+        if (strstr(line, "weight:") != NULL) {
+            weight_read = 1;
+            bias_read = 0;
+            continue;
+        } else if(strstr(line, "bias:" != NULL)) {
+            weight_read = 0;
+            bias_read = 1;
+            continue;
+        }
+
+        /* Process line into network*/
+        char *token;
+        char *ptr = line;
+        int i = 0;
+        while ((token = strtok(ptr, ",")) != NULL) {
+            if (i >= MAX_LINE_ELEMENTS) {
+                perror("nnetwork_read: Line too long");
+                exit(EXIT_FAILURE);
+            }
+
+            /* Reset errno value */
+            errno = 0;
+            char *end_ptr;
+
+            /* Convert str to double */
+            double value = strtod(token, &end_ptr);
+            if (errno || *end_ptr != '\0' || end_ptr == token) {
+                fprintf(stderr, "nnetwork_read: Read error with value: %s\n", token);
+                exit(EXIT_FAILURE);
+            }
+            ptr = NULL;
+            
+            if (weight_read && curr_weight_ptr < nn->weights + nn->total_weights) {
+                *curr_weight_ptr++ = (double) value;
+                weight_read = 0;
+            } else if (bias_read && curr_bias_ptr < nn->biases + nn->total_biases) {
+                *curr_bias_ptr++ = (double) value;  
+            } else {
+                perror("nnetwork_read: Error in reading value");
+                exit(EXIT_FAILURE);
+            }
+            i++;
+        }
+    }
+    free(line);
+    return nn;
+}
 
 /* Free memory used by a neural network */
 void nnetwork_free(nnetwork_t* nn);

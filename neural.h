@@ -1,7 +1,7 @@
 /*
  * NEURAL - Interface of module neural network
  * 
- * Implementation of network struct adapted from https://github.com/codeplea/genann
+ * Implementation of network adapted from https://github.com/codeplea/genann
  * 
  */
 
@@ -20,6 +20,8 @@
 #define HIDDEN_DIMENSION_6 40
 #define OUTPUT_DIMENSION 52
 
+#define MAX_LINE_ELEMENTS 225
+
 struct nnetwork;
 
 /* Activation functions */
@@ -31,10 +33,10 @@ typedef struct nnetwork {
     /* Number of input & output units, hidden layers, and hidden neurons */
     int input, hidden_layers, hidden_neurons, output;
 
-    /* Activation function between input and hidden layers. Default: ReLU */
+    /* Activation function between input and hidden layers. Default: relu */
     hidden_actfun activation_hidden;
 
-    /* Activation function used for output layer. Default: Sigmoid */
+    /* Activation function used for output layer. Default: softmax */
     output_actfun activation_output;
 
     /* Total number of weights */
@@ -56,12 +58,7 @@ typedef struct nnetwork {
     double *outputs;
 } nnetwork_t;
 
-/* ReLU function
- *
- * Parameters:
- *     *nn : pointer to neural network struct
- *     a   : input value
- */
+/* ReLU function */
 double relu(nnetwork_t *nn, double a);
 
 /* Softmax function */
