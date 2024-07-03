@@ -290,29 +290,55 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
     /* Store inputs in the respective neurons of output */
     memcpy(nn->outputs, inputs, sizeof(double) * nn->input);
 
-    /* Compute output layer with given equation from upstream github */
-    
+     // compute the forward pass
     double *in = nn->outputs;
     double *out = nn->outputs + nn->input;
     double *w = nn->weights;
     double *b = nn->biases;
-    
-  
-    for (int i = 0; i < nn->hidden_layers; ++i) {
-        for (int j = 0; j < nn->hidden_neurons; ++j) {
+
+    // process each hidden layer
+    int layer_sizes[HIDDEN_LAYERS] = {
+        HIDDEN_DIMENSION_1,
+        HIDDEN_DIMENSION_2,
+        HIDDEN_DIMENSION_3,
+        HIDDEN_DIMENSION_4,
+        HIDDEN_DIMENSION_5,
+        HIDDEN_DIMENSION_6
+    };
+
+    for (int layer = 0; layer < HIDDEN_LAYERS; ++layer) {
+        int in_neurons = (layer == 0) ? nn->input : layer_sizes[layer - 1];
+        int out_neurons = layer_sizes[layer];
+        
+        for (int j = 0; j < out_neurons; ++j) {
             double sum = 0.0;
-            for (int k = 0; k < nn->input; ++k) {
+            for (int k = 0; k < in_neurons; ++k) {
                 sum += in[k] * (*w++);
             }
             sum += *b++;
-            // apply activation function
-            nn->outputs[j] = nn->activation_hidden(nn, sum);
+            // apply activtiona function
+            out[j] = nn->activation_hidden(nn, sum);
         }
-        // set up for next layer
-        in = nn->outputs;
+        
+        // move input pointer to the output of the current layer
+        in = out;
+        out += out_neurons;
     }
 
-    
+    int in_neurons = layer_sizes[HIDDEN_LAYERS - 1]; // last layer!!!! :)
+    int out_neurons = nn->output;
+
+    for (int j = 0; j < out_neurons; ++j) {
+        double sum = 0.0;
+        for (int k = 0; k < in_neurons; ++k) {
+            sum += in[k] * (*w++);
+        }
+        sum += *b++;
+        nn->outputs[j] = sum; // store the raw output before softmax
+    }
+
+    // apply softmax to the output layer
+    nn->activation_output(nn, nn->outputs);
 
     free(inputs);
     free(line);
