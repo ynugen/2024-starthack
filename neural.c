@@ -255,7 +255,7 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
 
     /* Read in tensor to input buffer */
     while(getline(&inputs, &inputs_size, tensor) > 0) {
-        inputs[strcspn(input, "\n")] = '\0';
+        inputs[strcspn(inputs, "\n")] = '\0';
         
         char *token;
         char *ptr = inputs_ptr;
