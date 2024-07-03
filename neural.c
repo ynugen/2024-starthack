@@ -243,22 +243,24 @@ void nnetwork_print(nnetwork_t *nn) {
 
 /* Run the neural network with a given tensor */
 int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
+
+    // Allocate mem for line buffer
+    char *line = NULL;
+    size_t line_size = 0;
+
     /* Allocate mem for input buffer */
-    char *inputs = (char *) malloc(sizeof(char) * INPUT_DIMENSION);
+    double *inputs = (double *)malloc(sizeof(double) * INPUT_DIMENSION);
     if (!inputs) {
         perror("nnetwork_run: MALLOC error");
         exit(EXIT_FAILURE);
     }
-    size_t inputs_size = 0;
-
-    char *inputs_ptr = inputs;
 
     /* Read in tensor to input buffer */
-    while(getline(&inputs, &inputs_size, tensor) > 0) {
-        inputs[strcspn((char *)inputs, "\n")] = '\0';
+    while(getline(&line, &line_size, tensor) > 0) {
+        line[strcspn(line, "\n")] = '\0'; // removing newline character
         
         char *token;
-        char *ptr = (char *)inputs_ptr;
+        char *ptr = line;
         int i = 0;
         while((token = strtok(ptr, ",")) != NULL) {
             if (i >= INPUT_DIMENSION) {
@@ -277,11 +279,11 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
                 exit(EXIT_FAILURE);
             }
 
-            ptr = NULL;
             /* Store value in input buffer and increment */
-            *inputs_ptr = (double) value;
-            inputs_ptr++;
+            inputs[i] = value;
             i++;
+
+            ptr = NULL;
         }
     }
 
@@ -295,14 +297,25 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
     double *w = nn->weights;
     double *b = nn->biases;
     
-    int d = 0;
+  
     for (int i = 0; i < nn->hidden_layers; ++i) {
-        
-        while (i == 0 && d < INPUT_DIMENSION) {
-        double h = (*w++) * (*in) + (*b++);
+        for (int j = 0; j < nn->hidden_neurons; ++j) {
+            double sum = 0.0;
+            for (int k = 0; k < nn->input; ++k) {
+                sum += in[k] * (*w++);
+            }
+            sum += *b++;
+            // apply activation function
+            nn->outputs[j] = nn->activation_hidden(nn, sum);
         }
-
+        // set up for next layer
+        in = nn->outputs;
     }
 
+    
+
     free(inputs);
+    free(line);
+
+    return (int*) nn->outputs;
 }
