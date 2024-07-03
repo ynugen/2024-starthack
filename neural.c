@@ -170,4 +170,7 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
 }
 
 /* Free memory used by a neural network */
-void nnetwork_free(nnetwork_t* nn);
+void nnetwork_free(nnetwork_t* nn) {
+    /* Memory in nn allocated to single contiguous block */
+    free(nn);
+}
