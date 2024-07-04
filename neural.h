@@ -22,6 +22,14 @@
 
 #define MAX_LINE_ELEMENTS 22050
 
+/* Lookup table to convert probability to character */
+static const char table[OUTPUT_DIMENSION] = {
+    'A', 'a', 'B', 'b', 'C', 'c', 'D', 'd', 'E', 'e', 'F', 'f', 'G', 'g', 'H', 'h',
+    'I', 'i', 'J', 'j', 'K', 'k', 'L', 'l', 'M', 'm', 'N', 'n', 'O', 'o', 'P', 'p',
+    'Q', 'q', 'R', 'r', 'S', 's', 'T', 't', 'U', 'u', 'V', 'v', 'W', 'w', 'X', 'x',
+    'Y', 'y', 'Z', 'z'
+};
+
 struct nnetwork;
 
 /* Activation functions */
@@ -76,7 +84,12 @@ void nnetwork_free(nnetwork_t* nn);
 /* Print neural network. Used for error checking in storing values */
 void nnetwork_print(nnetwork_t *nn);
 
-/* Run the neural network with a given tensor */
-int const *nnetwork_run(nnetwork_t *nn, FILE *tensor);
+/* Run the neural network with a given tensor.
+ * Returns argmax of outputs.
+ */
+int nnetwork_run(nnetwork_t *nn, FILE *tensor);
+
+/* Return char value from lookup table */
+char lookup(int value);
 
 #endif

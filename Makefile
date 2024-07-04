@@ -17,7 +17,7 @@ HEADERS = neural.h
 OBJS = $(SRCS:.c=.o)
 
 # Define output files
-OUT = test.txt
+OUT = test.txt results.csv
 
 # Default target to build the executable
 all: $(TARGET)

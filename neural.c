@@ -242,7 +242,7 @@ void nnetwork_print(nnetwork_t *nn) {
 }
 
 /* Run the neural network with a given tensor */
-int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
+int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
 
     /* Allocate mem for line buffer */ 
     char *line = NULL;
@@ -338,10 +338,19 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
     }
 
     /* Apply softmax to the output layer */ 
-    nn->activation_output(nn, nn->outputs);
+    int argmax = nn->activation_output(nn, nn->outputs);
 
     free(inputs);
     free(line);
 
-    return (int*) nn->outputs;
+    return argmax;
+}
+
+/* Return char value from lookup table */
+char lookup(int value) {
+    if (value >= OUTPUT_DIMENSION) {
+        perror("lookup: value out of output bounds");
+        exit(EXIT_FAILURE);
+    }
+    return table[value];
 }
