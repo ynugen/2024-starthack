@@ -244,7 +244,7 @@ void nnetwork_print(nnetwork_t *nn) {
 /* Run the neural network with a given tensor */
 int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
 
-    // Allocate mem for line buffer
+    /* Allocate mem for line buffer */ 
     char *line = NULL;
     size_t line_size = 0;
 
@@ -305,7 +305,7 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
         HIDDEN_DIMENSION_5,
         HIDDEN_DIMENSION_6
     };
-
+    
     for (int layer = 0; layer < HIDDEN_LAYERS; ++layer) {
         int in_neurons = (layer == 0) ? nn->input : layer_sizes[layer - 1];
         int out_neurons = layer_sizes[layer];

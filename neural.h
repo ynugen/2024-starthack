@@ -54,7 +54,7 @@ typedef struct nnetwork {
     /* Flattened array of biases for each layer */
     double *biases;
 
-    /* Output array for each neuron */
+    /* Output array for input values and output neuron */
     double *outputs;
 } nnetwork_t;
 
