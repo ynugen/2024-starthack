@@ -185,7 +185,7 @@ void nnetwork_free(nnetwork_t* nn) {
     free(nn);
 }
 
-/* Print neural network to file */
+/* Print neural network to file. Used for error checking in storing values */
 void nnetwork_print(nnetwork_t *nn) {
     FILE *f;
     f = fopen("test.txt", "w");
@@ -290,13 +290,13 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
     /* Store inputs in the respective neurons of output */
     memcpy(nn->outputs, inputs, sizeof(double) * nn->input);
 
-     // compute the forward pass
+     /* Compute the forward pass */ 
     double *in = nn->outputs;
     double *out = nn->outputs + nn->input;
     double *w = nn->weights;
     double *b = nn->biases;
 
-    // process each hidden layer
+    /* Process each hidden layer */ 
     int layer_sizes[HIDDEN_LAYERS] = {
         HIDDEN_DIMENSION_1,
         HIDDEN_DIMENSION_2,
@@ -316,11 +316,11 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
                 sum += in[k] * (*w++);
             }
             sum += *b++;
-            // apply activtiona function
+            /* Apply activation function */ 
             out[j] = nn->activation_hidden(nn, sum);
         }
         
-        // move input pointer to the output of the current layer
+        /* Move input pointer to the output of the current layer */
         in = out;
         out += out_neurons;
     }
@@ -337,7 +337,7 @@ int const *nnetwork_run(nnetwork_t *nn, FILE *tensor) {
         nn->outputs[j] = sum; // store the raw output before softmax
     }
 
-    // apply softmax to the output layer
+    /* Apply softmax to the output layer */ 
     nn->activation_output(nn, nn->outputs);
 
     free(inputs);

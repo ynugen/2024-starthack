@@ -4,10 +4,10 @@
 
 int main(int argc, char** argv) {
 
-    /* Check correct arg input */
-    for (int i = 0; i <argc; ++i) {
-        printf("%d: %s\n", i, argv[i]);
-    }
+    /* Check arg inputs */
+    // for (int i = 0; i <argc; ++i) {
+    //     printf("%d: %s\n", i, argv[i]);
+    // }
 
     /* Open weights and biases file to read */
     FILE *f = fopen("weights_and_biases.txt", "r");
