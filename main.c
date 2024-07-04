@@ -4,7 +4,10 @@
 
 int main(int argc, char** argv) {
 
-    
+    /* Check correct arg input */
+    for (int i = 0; i <argc; ++i) {
+        printf("%d: %s\n", i, argv[i]);
+    }
 
     /* Open weights and biases file to read */
     FILE *f = fopen("weights_and_biases.txt", "r");
@@ -13,10 +16,7 @@ int main(int argc, char** argv) {
     nnetwork_t *nn = nnetwork_read(f);
     fclose(f);
 
-    
-
     /* Open tensor file to read */
-    
     FILE *t = fopen("tensors/01out.txt","r");
     assert(t);
 

@@ -16,6 +16,9 @@ HEADERS = neural.h
 # Define the object files (replace .c with .o)
 OBJS = $(SRCS:.c=.o)
 
+# Define output files
+OUT = test.txt
+
 # Default target to build the executable
 all: $(TARGET)
 
@@ -29,7 +32,7 @@ $(TARGET): $(OBJS)
 
 # Clean target to remove generated files
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(TARGET) $(OUT)
 
 # Phony targets (not actual files)
 .PHONY: all clean
