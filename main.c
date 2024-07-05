@@ -43,12 +43,17 @@ int main(int argc, char** argv) {
 
     struct dirent *tensor_file;
     while ((tensor_file = readdir(dp))) {
+        
         /* Skip current and parent dir */
         if (!strcmp(tensor_file->d_name, ".") || !strcmp(tensor_file->d_name, "..")) {
             continue;
         }
+        //printf("HELLO\n");
+       
         // printf("FILE: %s\n", tensor_file->d_name);
-        char* tensor_path = strcat(tensor_dir, tensor_file->d_name);
+        char tensor_path[512];
+        snprintf(tensor_path, sizeof(tensor_path), "%s/%s", tensor_dir, tensor_file->d_name);
+        //printf("HELLO2\n");
         FILE *t = fopen(tensor_path, "r");
         if (t == NULL) {
             perror("main: Unable to open file");
