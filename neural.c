@@ -22,17 +22,41 @@ double relu(const nnetwork_t *nn, double a) {
     return 0;
 }
 
+/* normalise input array */
+void normalise(double *a, int length) {
+    double mean = 0.0, std_dev = 0.0;
+    
+    // mean
+    for (int i = 0; i < length; ++i) {
+        mean += a[i];
+    }
+    mean /= length;
+    
+    // sd
+    for (int i = 0; i < length; ++i) {
+        std_dev += (a[i] - mean) * (a[i] - mean);
+    }
+    std_dev = sqrt(std_dev / length);
+    
+    // normalise
+    for (int i = 0; i < length; ++i) {
+        a[i] = (a[i] - mean) / std_dev;
+    }
+}
+
 /* Softmax function 
  *
  * Adapted from: https://en.wikipedia.org/wiki/Softmax_function
  */
 int softmax(const nnetwork_t *nn, double *a) {
+    //normalise(a, OUTPUT_DIMENSION);
     int argmax = 0;
-    double max = 0.0;
+    double max = a[0];
     double exp_sum = 0.0;
 
     /* Find max value of ouput values */
-    for (int i = 1; i < OUTPUT_DIMENSION; ++i) {
+    for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
+        //printf("a[%d]: %f\n", i, a[i]);
         if (a[i] > max) {
             max = a[i];
             argmax = i;
@@ -41,17 +65,49 @@ int softmax(const nnetwork_t *nn, double *a) {
 
     /* Compute sum and exponentiation */
     for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
+        // double difference = a[i] - max;
+        // double output = exp(difference);
         double output = exp(a[i] - max);
+        //printf("max: %f\n", max);
+        //printf("output: %f\n", output);
         nn->outputs[i] = output;
         exp_sum += output;
     }
+
+    //printf("EXP SUM: %f\n", exp_sum);
+    // printf("Softmax outputs: ");
+    // for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
+    //     printf("%f ", nn->outputs[i]);
+    // }
+    // printf("\n");
 
     /* Normalise values */
     for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
         nn->outputs[i] /= exp_sum;
     }
+    
+    // printf("Softmax inputs: ");
+    // for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
+    //     printf("%f ", a[i]);
+    // }
+    // printf("\n");
 
-    return argmax;
+    // printf("Softmax outputs: ");
+    // for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
+    //     printf("%f ", nn->outputs[i]);
+    // }
+    // printf("\n");
+
+    // printf("Argmax: %d\n", argmax);
+
+    
+    // double sum_of_outputs = 0.0;
+    // for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
+    //     printf("outputs[%d]: %f\n", i, nn->outputs[i]);
+    //     sum_of_outputs += nn->outputs[i];
+    // }
+    // printf("Sum of softmax outputs: %f\n", sum_of_outputs);
+    return argmax + 1;
 }
 
 /* Initialise memory for new neural network */
@@ -293,11 +349,15 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
     }
 
     /* Store inputs in the respective neurons of output */
-    memcpy(nn->outputs, inputs, sizeof(double) * nn->input);
+    //memcpy(nn->outputs, inputs, sizeof(double) * nn->input);
 
      /* Compute the forward pass */ 
-    double *in = nn->outputs;
-    double *out = nn->outputs + nn->input;
+    double in[nn->input];
+    memcpy(in, inputs, sizeof(double) * nn->input);
+    double out[100000]; // should make this the largest layer size if this implementation works later to save memory
+
+    double *current_in = in;
+    double *current_out = out;
     double *w = nn->weights;
     double *b = nn->biases;
 
@@ -311,23 +371,25 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
         HIDDEN_DIMENSION_6
     };
     
-    for (int layer = 0; layer < HIDDEN_LAYERS; ++layer) {
+    for (int layer = 0; layer < HIDDEN_LAYERS - 1; ++layer) {
         int in_neurons = (layer == 0) ? nn->input : layer_sizes[layer - 1];
         int out_neurons = layer_sizes[layer];
         
         for (int j = 0; j < out_neurons; ++j) {
             double sum = 0.0;
             for (int k = 0; k < in_neurons; ++k) {
-                sum += in[k] * (*w++);
+                sum += current_in[k] * w[k + j * in_neurons];
             }
-            sum += *b++;
+            sum += b[j];
             /* Apply activation function */ 
-            out[j] = nn->activation_hidden(nn, sum);
+            current_out[j] = nn->activation_hidden(nn, sum);
         }
         
         /* Move input pointer to the output of the current layer */
-        in = out;
-        out += out_neurons;
+        current_in = current_out;
+        current_out = out;
+        w += in_neurons * out_neurons;
+        b += out_neurons;
     }
 
     int in_neurons = layer_sizes[HIDDEN_LAYERS - 1]; // last layer!!!! :)
@@ -336,14 +398,22 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
     for (int j = 0; j < out_neurons; ++j) {
         double sum = 0.0;
         for (int k = 0; k < in_neurons; ++k) {
-            sum += in[k] * (*w++);
+            sum += current_in[k] * w[k + j * in_neurons];
+            //printf("weight: %f\n",  nn->weights[k + j * in_neurons]);
+            //printf("SUM: %f\n", sum);
         }
-        sum += *b++;
+        sum += b[j];
         nn->outputs[j] = sum; // store the raw output before softmax
     }
 
     /* Apply softmax to the output layer */ 
     int argmax = nn->activation_output(nn, nn->outputs);
+    // printf("Final outputs (before softmax):\n");
+    // for (int j = 0; j < nn->output; ++j) {
+    //     printf("%f ", nn->outputs[j]);
+    // }
+    // printf("\n");
+    // printf("Argmax: %d\n", argmax);
 
     free(inputs);
     free(line);

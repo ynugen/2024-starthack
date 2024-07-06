@@ -94,4 +94,6 @@ char lookup(int value);
 
 void print_weights_and_biases(nnetwork_t *nn);
 
+void normalize(double *a, int length);
+
 #endif
