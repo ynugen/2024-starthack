@@ -195,17 +195,22 @@ void nnetwork_print(nnetwork_t *nn) {
             fprintf(f,"LAYER 1 WEIGHTS:\n");
         } else if (i == INPUT_DIMENSION *HIDDEN_DIMENSION_1) {
             fprintf(f,"\n");
-            return;
+            //return;
             fprintf(f,"LAYER 2 WEIGHTS:\n");
         } else if (i == HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2) {
+            fprintf(f,"\n");
             fprintf(f,"LAYER 3 WEIGHTS:\n");
         } else if (i == HIDDEN_DIMENSION_2 * HIDDEN_DIMENSION_3) {
+            fprintf(f,"\n");
             fprintf(f,"LAYER 4 WEIGHTS:\n");
         } else if (i == HIDDEN_DIMENSION_3 * HIDDEN_DIMENSION_4) {
+            fprintf(f,"\n");
             fprintf(f,"LAYER 5 WEIGHTS:\n");
         } else if (i == HIDDEN_DIMENSION_4 * HIDDEN_DIMENSION_5) {
+            fprintf(f,"\n");
             fprintf(f,"LAYER 6 WEIGHTS:\n");
         } else if (i == HIDDEN_DIMENSION_5 * HIDDEN_DIMENSION_6) {
+            fprintf(f,"\n");
             fprintf(f, "LAYER 7 WEIGHTS:\n");
         } else {
             fprintf(f, ",");
@@ -220,7 +225,7 @@ void nnetwork_print(nnetwork_t *nn) {
             fprintf(f,"LAYER 1 BIAS:\n");
         } else if (i == HIDDEN_DIMENSION_1) {
             fprintf(f,"\n");
-            break;
+            //break;
             fprintf(f,"LAYER 2 BIAS:\n");
         } else if (i == HIDDEN_DIMENSION_2) {
             fprintf(f,"LAYER 3 BIAS:\n");
@@ -343,6 +348,7 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
     free(inputs);
     free(line);
 
+
     return argmax;
 }
 
@@ -353,4 +359,16 @@ char lookup(int value) {
         exit(EXIT_FAILURE);
     }
     return table[value];
+}
+
+void print_weights_and_biases(nnetwork_t *nn) {
+    printf("weights:\n");
+    for (int i = 0; i < nn->total_weights; ++i) {
+        printf("%f ", nn->weights[i]);
+    }
+    printf("\nbiases:\n");
+    for (int i = 0; i < nn->total_biases; ++i) {
+        printf("%f ", nn->biases[i]);
+    }
+    printf("\n");
 }

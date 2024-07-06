@@ -92,4 +92,6 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor);
 /* Return char value from lookup table */
 char lookup(int value);
 
+void print_weights_and_biases(nnetwork_t *nn);
+
 #endif

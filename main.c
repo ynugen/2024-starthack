@@ -4,9 +4,15 @@
 #include <dirent.h>
 #include <string.h>
 #include <assert.h>
+#include <dirent.h>
+
 
 #define WEIGHT_BIAS_PATH 1
 #define TENSOR_DIR_PATH 2
+
+int compare(const struct dirent **a, const struct dirent **b) {
+    return alphasort(a, b);
+}
 
 int main(int argc, char** argv) {
 
@@ -35,24 +41,29 @@ int main(int argc, char** argv) {
     fprintf(results, "image_number, guess\n");
 
     /* Read and run neural network on all files in give input tensor dir path */
-    DIR *dp = opendir(tensor_dir);
-    if (dp == NULL) {
+    //DIR *dp = opendir(tensor_dir);
+    struct dirent **nameList;
+    int n = scandir(tensor_dir, &nameList, NULL, alphasort);
+    if (n < 0) {
             perror("main: Unable to open directory");
             exit(EXIT_FAILURE);
         }
 
-    struct dirent *tensor_file;
-    while ((tensor_file = readdir(dp))) {
+    //struct dirent *tensor_file;
+    //while ((tensor_file = readdir(dp))) {
+
+    for (int i = 0; i < n; i++) {
         
         /* Skip current and parent dir */
-        if (!strcmp(tensor_file->d_name, ".") || !strcmp(tensor_file->d_name, "..")) {
+        if (!strcmp(nameList[i]->d_name, ".") || !strcmp(nameList[i]->d_name, "..")) {
+            // i should probs add a free here later (check valgrind)
             continue;
         }
         //printf("HELLO\n");
        
         // printf("FILE: %s\n", tensor_file->d_name);
-        char tensor_path[512];
-        snprintf(tensor_path, sizeof(tensor_path), "%s/%s", tensor_dir, tensor_file->d_name);
+        char tensor_path[1024];
+        snprintf(tensor_path, sizeof(tensor_path), "%s/%s", tensor_dir, nameList[i]->d_name);
         //printf("HELLO2\n");
         FILE *t = fopen(tensor_path, "r");
         if (t == NULL) {
@@ -61,12 +72,14 @@ int main(int argc, char** argv) {
         }
 
         int idx = nnetwork_run(nn, t);
+        printf("%s\n",nameList[i]->d_name);
+        printf("IDX: %d\n", idx);
         fprintf(results, "%d, %c\n", idx, lookup(idx));
         fclose(t);
     }
     nnetwork_free(nn);
     fclose(results);
-    closedir(dp);
+    //closedir(dp);
 
     
     // printf("HELLO\n");
