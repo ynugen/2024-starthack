@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
     /* Check arg inputs */
     char* weights_biases = (argc > WEIGHT_BIAS_PATH) ? argv[WEIGHT_BIAS_PATH] :"weights_and_biases.txt";
     char* tensor_dir = (argc >TENSOR_DIR_PATH) ? argv[TENSOR_DIR_PATH] : "tensors";
-    printf("%s\n%s\n", weights_biases, tensor_dir);
+    // printf("%s\n%s\n", weights_biases, tensor_dir);
 
     /* Open weights and biases file to read */
     FILE *f = fopen(weights_biases, "r");
@@ -72,8 +72,8 @@ int main(int argc, char** argv) {
         }
 
         int idx = nnetwork_run(nn, t);
-        printf("FILE NAME: %s\n",nameList[i]->d_name);
-        printf("IDX: %d\n", idx);
+        // printf("FILE NAME: %s\n",nameList[i]->d_name);
+        // printf("IDX: %d\n", idx);
         fprintf(results, "%d, %c\n", idx, lookup(idx));
         fclose(t);
     }
