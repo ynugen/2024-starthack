@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
     //while ((tensor_file = readdir(dp))) {
 
     for (int i = 0; i < n; i++) {
-        //if (i == 3) break;
+        //if (i == 4) break;
         /* Skip current and parent dir */
         if (!strcmp(nameList[i]->d_name, ".") || !strcmp(nameList[i]->d_name, "..")) {
             // i should probs add a free here later (check valgrind)
@@ -72,9 +72,9 @@ int main(int argc, char** argv) {
         }
 
         int idx = nnetwork_run(nn, t);
-        printf("FILE NAME: %s\n",nameList[i]->d_name);
-        printf("IDX: %d\n", idx);
-        fprintf(results, "%d, %c\n", idx, lookup(idx));
+        //printf("FILE NAME: %s\n",nameList[i]->d_name);
+        //printf("IDX: %d\n", idx);
+        fprintf(results, "%d, %c\n", i - 1, lookup(idx));
         fclose(t);
     }
     nnetwork_free(nn);

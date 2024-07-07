@@ -64,6 +64,15 @@ typedef struct nnetwork {
 
     /* Output array for input values and output neuron */
     double *outputs;
+
+    int fc1_weights;
+    int fc2_weights;
+    int fc3_weights;
+    int fc4_weights;
+    int fc5_weights;
+    int fc6_weights;
+    int fc7_weights;
+    
 } nnetwork_t;
 
 /* ReLU function */
