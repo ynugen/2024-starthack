@@ -54,6 +54,8 @@ int softmax(const nnetwork_t *nn, double *a) {
     double max = a[0];
     double exp_sum = 0.0;
 
+
+   
     /* Find max value of ouput values */
     for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
         //printf("a[%d]: %f\n", i, a[i]);
@@ -62,14 +64,19 @@ int softmax(const nnetwork_t *nn, double *a) {
             argmax = i;
         }
     }
+    int i = 0;
+    // while (i < 1000) {
+    //     printf("a[%d]: %f\n", i, a[i]);
+    //     i++;
+    // }
 
     /* Compute sum and exponentiation */
-    for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
+    for (int i = 0; i < OUTPUT_DIMENSION; ++i)  {
         // double difference = a[i] - max;
         // double output = exp(difference);
         double output = exp(a[i] - max);
         //printf("max: %f\n", max);
-        //printf("output: %f\n", output);
+        //printf("output: %f\n", a[i]);
         nn->outputs[i] = output;
         exp_sum += output;
     }
@@ -82,7 +89,7 @@ int softmax(const nnetwork_t *nn, double *a) {
     // printf("\n");
 
     /* Normalise values */
-    for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
+    for (int i = 0; i < OUTPUT_DIMENSION; ++i)  {
         nn->outputs[i] /= exp_sum;
     }
     
@@ -102,12 +109,12 @@ int softmax(const nnetwork_t *nn, double *a) {
 
     
     // double sum_of_outputs = 0.0;
-    // for (int i = 0; i < OUTPUT_DIMENSION; ++i) {
+    // for (int i = 0; i < nn->output; ++i)  {
     //     printf("outputs[%d]: %f\n", i, nn->outputs[i]);
     //     sum_of_outputs += nn->outputs[i];
     // }
     // printf("Sum of softmax outputs: %f\n", sum_of_outputs);
-    return argmax + 1;
+    return argmax;
 }
 
 /* Initialise memory for new neural network */
@@ -124,8 +131,8 @@ nnetwork_t *nnetwork_init() {
 
     const int total_weights = (INPUT_DIMENSION * HIDDEN_DIMENSION_1) + (HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2) +
                             (HIDDEN_DIMENSION_2 * HIDDEN_DIMENSION_3) + (HIDDEN_DIMENSION_3 * HIDDEN_DIMENSION_4) +
-                            (HIDDEN_DIMENSION_4 * HIDDEN_DIMENSION_5) + (HIDDEN_DIMENSION_5 * HIDDEN_DIMENSION_6) +
-                            (HIDDEN_DIMENSION_6 * OUTPUT_DIMENSION);
+                            (HIDDEN_DIMENSION_5 * HIDDEN_DIMENSION_6) + (HIDDEN_DIMENSION_6 * OUTPUT_DIMENSION) + 750;
+
     
 
     /* Allocate memory for nnetwork_t */
@@ -169,10 +176,13 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
     /* Set pointers */
     double *curr_weight_ptr = nn->weights;
     double *curr_bias_ptr = nn->biases;
+   // printf("total weights: %d\n", nn->total_weights);
 
     /* Set read state flags */
     int weight_read = 0;
     int bias_read = 0;
+    int weights_read = 0;
+    int biases_read = 0;
     
     while (getline(&line, &line_size, weights_and_biases) > 0) {
         /* Calculate line size */
@@ -225,10 +235,16 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
                 *curr_weight_ptr = (double) value;
                 wr++;
                 curr_weight_ptr++;
+                weights_read++;
+                //printf("VALUE: %f\n", value);
+                if (weights_read > nn->total_weights) {
+                    //printf("VALUE: %f\n", value);
+                }
             } else if (bias_read) {
                 *curr_bias_ptr = (double) value;
                 br++;
                 curr_bias_ptr++;
+                biases_read++;
             } else {
                 printf("ITEM: %d WEIGHT READ: %d BIAS READ: %d\nCURR_WEIGHT_PTR: %p\nWEIGHTS + TOTAL WEIGHTS: %p\n", i, weight_read, bias_read, curr_weight_ptr, nn->weights + nn->total_weights);
                 perror("nnetwork_read: Error in storing value");
@@ -236,8 +252,11 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
             }
             i++;
         }
-        printf("Weights read: %d\nBiases read: %d\n", wr, br);
+        
     }
+
+    printf("Weights Read: %d vs Total Weights %d\n", weights_read, nn->total_weights);
+    printf("Biases Read: %d vs Total Biases: %d \n", biases_read, nn->total_biases);
     
     free(line);
     return nn;
@@ -253,27 +272,33 @@ void nnetwork_free(nnetwork_t* nn) {
 void nnetwork_print(nnetwork_t *nn) {
     FILE *f;
     f = fopen("test.txt", "w");
-    for (int i = 0; i <nn->total_weights; ++i) {
+    for (int i = 0; i < nn->total_weights; ++i) {
         /* Print headers */
         if (i == 0) {
             fprintf(f,"LAYER 1 WEIGHTS:\n");
-        } else if (i == INPUT_DIMENSION *HIDDEN_DIMENSION_1) {
+        } else if (i == (INPUT_DIMENSION *HIDDEN_DIMENSION_1)) {
             fprintf(f,"\n");
             //return;
             fprintf(f,"LAYER 2 WEIGHTS:\n");
-        } else if (i == HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2) {
+        } else if (i == (INPUT_DIMENSION *HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2)) {
             fprintf(f,"\n");
             fprintf(f,"LAYER 3 WEIGHTS:\n");
-        } else if (i == HIDDEN_DIMENSION_2 * HIDDEN_DIMENSION_3) {
+        } else if (i == (INPUT_DIMENSION *HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2 + 
+                    HIDDEN_DIMENSION_2 * HIDDEN_DIMENSION_3)) {
             fprintf(f,"\n");
             fprintf(f,"LAYER 4 WEIGHTS:\n");
-        } else if (i == HIDDEN_DIMENSION_3 * HIDDEN_DIMENSION_4) {
+        } else if (i == (INPUT_DIMENSION *HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2 + 
+                    HIDDEN_DIMENSION_2 * HIDDEN_DIMENSION_3 + HIDDEN_DIMENSION_3 * HIDDEN_DIMENSION_4)) {
             fprintf(f,"\n");
             fprintf(f,"LAYER 5 WEIGHTS:\n");
-        } else if (i == HIDDEN_DIMENSION_4 * HIDDEN_DIMENSION_5) {
+        } else if (i == (INPUT_DIMENSION *HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2 + 
+                    HIDDEN_DIMENSION_2 * HIDDEN_DIMENSION_3 + HIDDEN_DIMENSION_3 * HIDDEN_DIMENSION_4 +
+                    HIDDEN_DIMENSION_4 * HIDDEN_DIMENSION_5)) {
             fprintf(f,"\n");
             fprintf(f,"LAYER 6 WEIGHTS:\n");
-        } else if (i == HIDDEN_DIMENSION_5 * HIDDEN_DIMENSION_6) {
+        } else if (i == (INPUT_DIMENSION *HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2 + 
+                    HIDDEN_DIMENSION_2 * HIDDEN_DIMENSION_3 + HIDDEN_DIMENSION_3 * HIDDEN_DIMENSION_4 +
+                    HIDDEN_DIMENSION_4 * HIDDEN_DIMENSION_5 + HIDDEN_DIMENSION_5 * HIDDEN_DIMENSION_6)) {
             fprintf(f,"\n");
             fprintf(f, "LAYER 7 WEIGHTS:\n");
         } else {
@@ -291,15 +316,15 @@ void nnetwork_print(nnetwork_t *nn) {
             fprintf(f,"\n");
             //break;
             fprintf(f,"LAYER 2 BIAS:\n");
-        } else if (i == HIDDEN_DIMENSION_2) {
+        } else if (i == ( HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_2)) {
             fprintf(f,"LAYER 3 BIAS:\n");
-        } else if (i == HIDDEN_DIMENSION_3) {
+        } else if (i == ( HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_2 + HIDDEN_DIMENSION_3)) {
             fprintf(f,"LAYER 4 BIAS:\n");
-        } else if (i == HIDDEN_DIMENSION_4) {
+        } else if (i == (HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_2 + HIDDEN_DIMENSION_3 + HIDDEN_DIMENSION_4)) {
             fprintf(f,"LAYER 5 BIAS:\n");
-        } else if (i == HIDDEN_DIMENSION_5) {
+        } else if (i == (HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_2 + HIDDEN_DIMENSION_3 + HIDDEN_DIMENSION_4 + HIDDEN_DIMENSION_5)) {
             fprintf(f,"LAYER 6 BIAS:\n");
-        } else if (i == HIDDEN_DIMENSION_6) {
+        } else if (i == (HIDDEN_DIMENSION_1 + HIDDEN_DIMENSION_2 + HIDDEN_DIMENSION_3 + HIDDEN_DIMENSION_4 + HIDDEN_DIMENSION_5 + HIDDEN_DIMENSION_6)) {
             fprintf(f,"LAYER 7 BIAS:\n");
         } else {
             fprintf(f, ",");
@@ -323,7 +348,7 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
         perror("nnetwork_run: MALLOC error");
         exit(EXIT_FAILURE);
     }
-
+    //printf("total neurons: %d\n", nn->total_neurons);
     /* Read in tensor to input buffer */
     while(getline(&line, &line_size, tensor) > 0) {
         line[strcspn(line, "\n")] = '\0'; // removing newline character
@@ -342,6 +367,7 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
 
             /* Read and convert value to double */
             double value = strtod(token, &end_ptr);
+            //printf("tensor value: %f\n", value);
 
             if(errno || *end_ptr != '\0' || end_ptr == token) {
                 fprintf(stderr, "nnetwork_run: Read error with tensor value");
@@ -360,11 +386,14 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
     //memcpy(nn->outputs, inputs, sizeof(double) * nn->input);
 
      /* Compute the forward pass */ 
+    //double in[nn->input];
     double in[nn->input];
     memcpy(in, inputs, sizeof(double) * nn->input);
+    //printf("in = %f\n", in[0]);
     double out[100000]; // should make this the largest layer size if this implementation works later to save memory
 
     double *current_in = in;
+    //printf("current in = %f\n", current_in[0]);
     double *current_out = out;
     double *w = nn->weights;
     double *b = nn->biases;
@@ -378,27 +407,43 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
         HIDDEN_DIMENSION_5,
         HIDDEN_DIMENSION_6
     };
+
+    //int biases_calc = 0;
+    int weights_calc = 0;
     
-    for (int layer = 0; layer < HIDDEN_LAYERS - 1; ++layer) {
+    for (int layer = 0; layer < HIDDEN_LAYERS; ++layer) {
         int in_neurons = (layer == 0) ? nn->input : layer_sizes[layer - 1];
         int out_neurons = layer_sizes[layer];
-        
         for (int j = 0; j < out_neurons; ++j) {
             double sum = 0.0;
             for (int k = 0; k < in_neurons; ++k) {
+                //weights_calc++;
                 sum += current_in[k] * w[k + j * in_neurons];
+
+                // if (layer == 3) {
+                //     printf("weight: %f, bias: %f\n ", w[k + j * in_neurons], b[j]);
+                // }
             }
             sum += b[j];
+            //biases_calc++;
+            //printf("b = %f\n", b[j]);
             /* Apply activation function */ 
             current_out[j] = nn->activation_hidden(nn, sum);
         }
-        
+        //printf("biases calculated: %d vs total biases: %d\n", biases_calc, nn->total_biases);
         /* Move input pointer to the output of the current layer */
         current_in = current_out;
+
         current_out = out;
         w += in_neurons * out_neurons;
+        //weights_calc += in_neurons * out_neurons;
         b += out_neurons;
+        
     }
+
+    // for (int i = 0; i < biases_calc + 100; i++) {
+    //     //printf("b[%d] = %f\n", i, b[i]);
+    // }
 
     int in_neurons = layer_sizes[HIDDEN_LAYERS - 1]; // last layer!!!! :)
     int out_neurons = nn->output;
@@ -407,17 +452,20 @@ int nnetwork_run(nnetwork_t *nn, FILE *tensor) {
         double sum = 0.0;
         for (int k = 0; k < in_neurons; ++k) {
             sum += current_in[k] * w[k + j * in_neurons];
+            //weights_calc++;
             //printf("weight: %f\n",  nn->weights[k + j * in_neurons]);
-            //printf("SUM: %f\n", sum);
         }
         sum += b[j];
         nn->outputs[j] = sum; // store the raw output before softmax
+        //printf("j: %d, out_neurons: %d, sum: %f\n", j, out_neurons, sum);
     }
-
+    
+    //printf("total weights calculated: %d, next weight: %f\n", weights_calc, w[1]);
     /* Apply softmax to the output layer */ 
     int argmax = nn->activation_output(nn, nn->outputs);
     // printf("Final outputs (before softmax):\n");
-    // for (int j = 0; j < nn->output; ++j) {
+
+    // for (int j = 0; j < 1000; ++j) {
     //     printf("%f ", nn->outputs[j]);
     // }
     // printf("\n");
