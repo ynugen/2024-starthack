@@ -132,6 +132,7 @@ nnetwork_t *nnetwork_init() {
     const int total_weights = (INPUT_DIMENSION * HIDDEN_DIMENSION_1) + (HIDDEN_DIMENSION_1 * HIDDEN_DIMENSION_2) +
                             (HIDDEN_DIMENSION_2 * HIDDEN_DIMENSION_3) + (HIDDEN_DIMENSION_3 * HIDDEN_DIMENSION_4) +
                             (HIDDEN_DIMENSION_5 * HIDDEN_DIMENSION_6) + (HIDDEN_DIMENSION_6 * OUTPUT_DIMENSION) + 750;
+
     
 
     /* Allocate memory for nnetwork_t */
@@ -202,6 +203,9 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
         char *token;
         char *ptr = line;
         int i = 0;
+        /* Counters */
+        int wr = 0;
+        int br = 0;
         while ((token = strtok(ptr, ",")) != NULL) {
             if (i >= MAX_LINE_ELEMENTS) {
                 printf("Elements: %d\n", i);
@@ -229,6 +233,7 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
             //     curr_bias_ptr++;
             if(weight_read) {
                 *curr_weight_ptr = (double) value;
+                wr++;
                 curr_weight_ptr++;
                 weights_read++;
                 //printf("VALUE: %f\n", value);
@@ -237,6 +242,7 @@ nnetwork_t *nnetwork_read(FILE *weights_and_biases) {
                 }
             } else if (bias_read) {
                 *curr_bias_ptr = (double) value;
+                br++;
                 curr_bias_ptr++;
                 biases_read++;
             } else {
